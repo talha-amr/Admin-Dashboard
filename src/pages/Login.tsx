@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 // shadcn/ui basic component imports
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,7 @@ type AuthFormData = z.infer<typeof authSchema>;
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -33,6 +34,7 @@ export default function Login() {
 
   const onSubmit = async (data: AuthFormData) => {
     setErrorMessage(null);
+    setSuccessMessage(null);
     setIsSubmitting(true);
 
     if (isSignUp) {
@@ -47,7 +49,7 @@ export default function Login() {
       if (error) {
         setErrorMessage(error.message);
       } else {
-        alert('Account created successfully! You can now sign in.');
+        setSuccessMessage('Account created successfully! You can now sign in.');
         setIsSignUp(false);
       }
     } else {
@@ -78,12 +80,19 @@ export default function Login() {
           </CardDescription>
         </CardHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
+          <CardContent className="space-y-5 pb-8">
             {errorMessage && (
               <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{errorMessage}</span>
+              </div>
+            )}
+            
+            {successMessage && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm font-medium text-emerald-500">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>{successMessage}</span>
               </div>
             )}
 
@@ -125,7 +134,7 @@ export default function Login() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex flex-col space-y-4 pt-4">
+          <CardFooter className="flex flex-col space-y-4 py-6 px-6">
             <Button
               type="submit"
               disabled={isSubmitting}
