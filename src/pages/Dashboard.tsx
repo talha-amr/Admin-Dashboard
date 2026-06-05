@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Building2, Plus, Briefcase, GraduationCap, ArrowLeft, Users, Calendar } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 interface Organization {
   id: string;
@@ -14,7 +15,7 @@ interface Organization {
   type: 'School' | 'Nonprofit' | 'Business';
   school_district: string | null;
   created_at: string;
-  // Captures the server-side aggregation count payload from Supabase
+  // Safely captures the server-side aggregation payload from Supabase
   organization_members: { count: number }[];
 }
 
@@ -45,45 +46,38 @@ export default function Dashboard() {
 
   const getTypeIcon = (type: Organization['type']) => {
     switch (type) {
-      case 'School': return <GraduationCap className="h-4 w-4 text-indigo-400" />;
-      case 'Nonprofit': return <Building2 className="h-4 w-4 text-emerald-400" />;
-      case 'Business': return <Briefcase className="h-4 w-4 text-amber-400" />;
-      default: return <Building2 className="h-4 w-4 text-zinc-400" />;
+      case 'School': return <GraduationCap className="h-5 w-5 text-indigo-400" />;
+      case 'Nonprofit': return <Building2 className="h-5 w-5 text-emerald-400" />;
+      case 'Business': return <Briefcase className="h-5 w-5 text-amber-400" />;
+      default: return <Building2 className="h-5 w-5 text-zinc-400" />;
     }
   };
 
   return (
     <div className="min-h-screen bg-zinc-950 font-sans text-zinc-100 selection:bg-zinc-800">
-      <header className="border-b border-zinc-900 bg-zinc-900/20 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <button 
-            onClick={() => setSelectedOrg(null)}
-            className="flex items-center gap-2 transition-colors hover:text-white group text-zinc-300"
-          >
-            <Building2 className="h-5 w-5 text-white" />
-            <span className="font-medium tracking-tight">Workspace Console</span>
-          </button>
-          
-          {!selectedOrg && (
+      <Navbar 
+        onTitleClick={() => setSelectedOrg(null)}
+        actions={
+          !selectedOrg && (
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
-                <Button className="gap-1.5 bg-zinc-100 text-xs font-medium text-zinc-950 hover:bg-zinc-200">
+                <Button size="sm" className="gap-1.5 font-medium transition-all hover:scale-[1.02]">
                   <Plus className="h-3.5 w-3.5" /> New Organization
                 </Button>
               </DialogTrigger>
-              <DialogContent className="border-zinc-800 bg-zinc-900 text-zinc-100 sm:max-w-md">
+              <DialogContent className="border-border/50 bg-card/95 backdrop-blur-xl sm:max-w-md shadow-2xl">
                 <DialogHeader>
-                  <DialogTitle className="text-white">Register Organization</DialogTitle>
-                  <DialogDescription className="text-zinc-400">
+                  <DialogTitle>Register Organization</DialogTitle>
+                  <DialogDescription>
                     Set up a new isolated organizational workspace context.
                   </DialogDescription>
                 </DialogHeader>
                 <CreateOrganizationForm onSuccess={() => setIsOpen(false)} />
               </DialogContent>
             </Dialog>
-          )}
-        </div>
-      </header>
+          )
+        }
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {selectedOrg ? (
@@ -109,7 +103,7 @@ export default function Dashboard() {
             {isLoading && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3].map((n) => (
-                  <div key={n} className="h-36 w-full animate-pulse rounded-xl border border-zinc-900 bg-zinc-900/20" />
+                  <div key={n} className="h-32 w-full animate-pulse rounded-xl border border-zinc-900 bg-zinc-900/20" />
                 ))}
               </div>
             )}
@@ -133,7 +127,6 @@ export default function Dashboard() {
             {!isLoading && !isError && organizations && organizations.length > 0 && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {organizations.map((org) => {
-                  // Extracts our aggregated sub-count cleanly safely defaulting to 0
                   const memberCount = org.organization_members?.[0]?.count || 0;
                   const formattedDate = new Date(org.created_at).toLocaleDateString('en-US', {
                     month: 'short',
@@ -145,10 +138,10 @@ export default function Dashboard() {
                     <Card 
                       key={org.id} 
                       onClick={() => setSelectedOrg(org)}
-                      className="border-zinc-900 bg-zinc-900/30 transition-all hover:border-zinc-800 cursor-pointer group flex flex-col justify-between min-h-[150px]"
+                      className="border-zinc-900 bg-zinc-900/30 transition-all hover:border-zinc-800 cursor-pointer group flex flex-col justify-between min-h-[160px]"
                     >
-                      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
-                        <div className="space-y-1.5">
+                      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                        <div className="space-y-1">
                           <CardTitle className="text-sm font-medium text-white group-hover:text-zinc-200 transition-colors">
                             {org.name}
                           </CardTitle>
@@ -160,15 +153,19 @@ export default function Dashboard() {
                           {getTypeIcon(org.type)}
                         </div>
                       </CardHeader>
-                      
-                      <CardContent className="pt-0">
-                        {org.type === 'School' && org.school_district && (
-                          <div className="text-[11px] text-zinc-500 mb-3">
+
+                      <CardContent className="flex flex-col justify-between flex-1 pt-2">
+                        {org.type === 'School' && org.school_district ? (
+                          <div className="text-xs text-zinc-500 mb-4">
                             District: <span className="text-zinc-300 font-medium">{org.school_district}</span>
                           </div>
+                        ) : (
+                          <div className="text-xs text-zinc-600 italic mb-4">
+                            Click to manage team roster
+                          </div>
                         )}
-                        
-                        {/* Dynamic Metadata Row displaying Member Count and Formatted Date */}
+
+                        {/* Integrated Directory Metadata Footer */}
                         <div className="flex items-center justify-between border-t border-zinc-900/60 pt-3 text-[11px] text-zinc-400">
                           <div className="flex items-center gap-1">
                             <Users className="h-3.5 w-3.5 text-zinc-500" />
