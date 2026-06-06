@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export default function Login() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit, formState: { errors } } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
@@ -53,13 +55,18 @@ export default function Login() {
         setIsSignUp(false);
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
-      if (error) setErrorMessage(error.message);
-      else navigate('/dashboard');
+      if (error) {
+        setErrorMessage(error.message);
+      } else {
+        queryClient.clear();
+        queryClient.setQueryData(['supabase-session'], authData.session);
+        navigate('/dashboard');
+      }
     }
     setIsSubmitting(false);
   };

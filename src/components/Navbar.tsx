@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Building2, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ interface NavbarProps {
 
 export default function Navbar({ title = 'Workspace Console', onTitleClick, actions }: NavbarProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
@@ -26,6 +27,7 @@ export default function Navbar({ title = 'Workspace Console', onTitleClick, acti
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    queryClient.clear();
     navigate('/login');
   };
 
@@ -40,10 +42,10 @@ export default function Navbar({ title = 'Workspace Console', onTitleClick, acti
             onClick={onTitleClick}
             className="flex items-center gap-2 transition-colors hover:opacity-80 group text-foreground"
           >
-            <div className="rounded-lg bg-primary/10 p-1.5 text-primary transition-colors group-hover:bg-primary/20">
-              <Building2 className="h-5 w-5" />
+            <div className="rounded-lg bg-primary/10 p-1.5 text-primary transition-colors group-hover:bg-primary/20 shrink-0">
+              <Building2 className="h-5 w-5 shrink-0" />
             </div>
-            <span className="font-semibold tracking-tight">{title}</span>
+            <span className="font-semibold tracking-tight whitespace-nowrap text-sm sm:text-base">{title}</span>
           </button>
         </div>
 

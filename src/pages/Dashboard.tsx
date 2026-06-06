@@ -61,8 +61,10 @@ export default function Dashboard() {
           !selectedOrg && (
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="gap-1.5 font-medium transition-all hover:scale-[1.02]">
-                  <Plus className="h-3.5 w-3.5" /> New Organization
+                <Button size="sm" className="gap-1.5 font-medium transition-all hover:scale-[1.02] px-3 sm:px-4">
+                  <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> 
+                  <span className="sm:hidden">New</span>
+                  <span className="hidden sm:inline-block">New Organization</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="border-border/50 bg-card/95 backdrop-blur-xl sm:max-w-md shadow-2xl">

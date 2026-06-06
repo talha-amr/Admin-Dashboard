@@ -76,6 +76,7 @@ export default function MemberManagement({ organizationId, organizationName }: M
     onSuccess: () => {
       // Instantly clear client query cache to draw new server values seamlessly
       queryClient.invalidateQueries({ queryKey: ['members', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
       reset(); 
     }
   });
